@@ -5,13 +5,13 @@ const int FIRSTMAX = 128;
 /// </summary>
 class Vector
 {
-	int* vec;
-	int size;
-	int capacity;
+	int* _vec;
+	int _size;
+	int _capacity;
 
 	void set(Vector v);
 
-	void set(int size, int* v);
+	void set(int _size, int* v);
 
 	/// <summary>
 	/// copy vek to temp
@@ -32,12 +32,14 @@ class Vector
 
 public:
 	//defult ctor
-	Vector(int size = 0, int value = 0);
+	Vector(int _size = 0, int value = 0);
 
 	//copy ctor
 	Vector(const Vector& v);
 
-	Vector(int size, int* arr);
+	Vector(int _size, int* arr);
+
+	Vector(Vector&& other);
 
 	~Vector();
 	
@@ -84,9 +86,11 @@ public:
 
 	Vector operator=(const Vector& v);
 
+	Vector& operator=(Vector&& other);
+
 	int& operator[](int i);
 
-	bool operator==(const Vector& v);
+	bool operator==(const Vector& v) const;
 
 	Vector operator+(Vector v);
 
