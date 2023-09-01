@@ -1,13 +1,39 @@
 #include <iostream>
 #include "Vector.h"
 
+Vector::Vector(Vector&& other)
+	: _vec(nullptr), _capacity(0), _size(0)
+{
+	// Move the resources from 'other' to this object
+	swap(other);
+}
+
+Vector& Vector::operator=(Vector&& other)
+{
+	if (this != &other)
+	{
+		// Release the current resources
+		delete[] _vec;
+
+		// Move the resources from 'other' to this object
+		_vec = other._vec;
+		_capacity = other._capacity;
+		_size = other._size;
+
+		// Reset 'other' to a valid but empty state
+		other._vec = nullptr;
+		other._capacity = 0;
+		other._size = 0;
+	}
+	return *this;
+}
 void Vector::set(Vector v)
 {
-	capacity = v.capacity;
-	size = v.size;
-	for (int i = 0; i < size; i++)
+	_capacity = v._capacity;
+	_size = v._size;
+	for (int i = 0; i < _size; i++)
 	{
-		vec[i] = v.vec[i];
+		_vec[i] = v._vec[i];
 	}
 }
 
@@ -31,19 +57,19 @@ int Vector::insertCapacity(int capa, int n)
 	return capa;
 }
 
-void Vector::set(int size, int* v)
+void Vector::set(int _size, int* v)
 {
-	for (int i = 0; i < size; i++)
+	for (int i = 0; i < _size; i++)
 	{
-		vec[i] = v[i];
+		_vec[i] = v[i];
 	}
 }
 
 int* Vector::copy(int* temp)
 {
-	for (int i = 0; i < size; i++)
+	for (int i = 0; i < _size; i++)
 	{
-		temp[i] = vec[i];
+		temp[i] = _vec[i];
 	}
 	return temp;
 }
@@ -54,50 +80,54 @@ Vector::Vector(int size, int value)
 {
 	if (size != 0)
 	{
-		vec = new int[size];
-		this->capacity = size;
-		this->size = 1;
-		vec[0] = value;
+		_vec = new int[size];
+		this->_capacity = size;
+		this->_size = size;
+		for (int i = 0; i < size; i++)
+		{
+			_vec[i] = value;
+		}
 	}
 	else
 	{
-		vec = nullptr;
-		capacity = this->size = 0;
+		_vec = nullptr;
+		_capacity = this->_size = 0;
 	}
 }
+
 
 Vector::Vector(const Vector& v)
 {
-	vec = new int[v.capacity];
-	capacity = v.capacity;
-	size = v.size;
-	for (int i = 0; i < size; i++)
+	_vec = new int[v._capacity];
+	_capacity = v._capacity;
+	_size = v._size;
+	for (int i = 0; i < _size; i++)
 	{
-		vec[i] = v.vec[i];
+		_vec[i] = v._vec[i];
 	}
 
 }
 
-Vector::Vector(int size, int* arr)
+Vector::Vector(int _size, int* arr)
 {
-	capacity = size;
-	vec = new int[capacity];
-	this->size = size;
-	set(size, arr);
+	_capacity = _size;
+	_vec = new int[_capacity];
+	this->_size = _size;
+	set(_size, arr);
 }
 
 Vector::~Vector()
 {
-	delete[] vec;
+	delete[] _vec;
 }
 
 Vector Vector::operator=(const Vector& v)
 {
 	if (!empty())
 	{
-		delete[] vec;
+		delete[] _vec;
 	}
-	vec = new int[v.capacity];
+	_vec = new int[v._capacity];
 	set(v);
 
 	return *this;
@@ -105,72 +135,72 @@ Vector Vector::operator=(const Vector& v)
 
 int* Vector::data()
 {
-	return vec;
+	return _vec;
 }
 
 bool Vector::empty() const
 {
-	return size == 0;
+	return _size == 0;
 }
 
 int Vector::Size() const
 {
-	return size;
+	return _size;
 }
 
 int Vector::Capacity() const
 {
-	return capacity;
+	return _capacity;
 }
 
 void Vector::clear()
 {
 	if (!empty())
 	{
-		delete[] vec;
-		size = 0;
-		if (capacity != 0)
+		delete[] _vec;
+		_size = 0;
+		if (_capacity != 0)
 		{
-			vec = new int[capacity];
+			_vec = new int[_capacity];
 		}
 	}
 }
 
 void Vector::resize(int n, int val)
 {
-	if (n <= size)
+	if (n <= _size)
 	{
-		int i = size - n;
-		for (i; i < size; i++)
+		int i = _size - n;
+		for (i; i < _size; i++)
 		{
-			vec[i] = 0;
+			_vec[i] = 0;
 		}
-		size = size - n;
+		_size = _size - n;
 	}
 	else
 	{
-		if (n < capacity)
+		if (n < _capacity)
 		{
-			int i = size;
+			int i = _size;
 			for (i; i < n; i++)
 			{
-				vec[i] = val;
+				_vec[i] = val;
 			}
-			size = n;
+			_size = n;
 		}
 		else
 		{
-			capacity = insertCapacity(capacity, n);
+			_capacity = insertCapacity(_capacity, n);
 
-			int* temp = new int[capacity];
+			int* temp = new int[_capacity];
 			temp = copy(temp);
-			for (int i = size; i < n; i++)
+			for (int i = _size; i < n; i++)
 			{
 				temp[i] = val;
 			}
-			size = n;
-			delete[] vec;
-			vec = temp;
+			_size = n;
+			delete[] _vec;
+			_vec = temp;
 		}
 
 	}
@@ -186,50 +216,43 @@ void Vector::push_back(const int val)
 {
 	if (val != 0)
 	{
-		if (size < capacity)
+		if (_size < _capacity)
 		{
-			vec[size] = val;
-			size += 1;
+			_vec[_size] = val;
+			_size += 1;
 		}
 		else
 		{
-			capacity = insertCapacity(capacity, capacity + 1);
-			int* temp = new int[capacity];
-			size += 1;
-			for (int i = 0; i < size - 1; i++)
+			_capacity = insertCapacity(_capacity, _capacity + 1);
+			int* temp = new int[_capacity];
+			_size += 1;
+			for (int i = 0; i < _size - 1; i++)
 			{
-				temp[i] = vec[i];
+				temp[i] = _vec[i];
 			}
-			temp[size - 1] = val;
-			delete[] vec;
-			vec = temp;
+			temp[_size - 1] = val;
+			delete[] _vec;
+			_vec = temp;
 		}
 	}
 
 }
-
-//int& Vector::operator=(int& v)
-//{
-//	size += 1;
-//	
-//	return v;
-//}
 
 
 void Vector::pop_back()
 {
 	if (!empty())
 	{
-		vec[size - 1] = 0;
-		size -= 1;
+		_vec[_size - 1] = 0;
+		_size -= 1;
 	}
 }
 
 int& Vector::operator[](int i)
 {
-	if (0 <= i && i < size)
+	if (0 <= i && i < _size)
 	{
-		return vec[i];
+		return _vec[i];
 	}
 	else
 	{
@@ -238,13 +261,13 @@ int& Vector::operator[](int i)
 	}
 }
 
-bool Vector::operator==(const Vector& v)
+bool Vector::operator==(const Vector& v) const
 {
-	if (capacity == v.capacity && size == v.capacity)
+	if (_size == v._size)
 	{
-		for (int i = 0; i < size; i++)
+		for (int i = 0; i < _size; i++)
 		{
-			if (vec[i] != v.vec[i])
+			if (_vec[i] != v._vec[i])
 			{
 				return false;
 			}
@@ -253,6 +276,7 @@ bool Vector::operator==(const Vector& v)
 	}
 	return false;
 }
+
 
 Vector Vector::operator+(Vector v)
 {
@@ -263,109 +287,109 @@ Vector Vector::operator+(Vector v)
 
 void Vector::operator+=(Vector v)
 {
-	int newSize = size + v.size;
-	if (newSize < capacity)
+	int newSize = _size + v._size;
+	if (newSize < _capacity)
 	{
 		int j = 0;
-		for (int i = size; i < newSize; i++)
+		for (int i = _size; i < newSize; i++)
 		{
-			vec[i] = v[j];
+			_vec[i] = v[j];
 			j++;
 		}
 		
 	}
 	else
 	{
-		int newCapacity = insertCapacity(capacity, newSize);
+		int newCapacity = insertCapacity(_capacity, newSize);
 		int* temp = new int[newCapacity];
 		temp = copy(temp);
 		int j = 0;
-		for (int i = size; i < newSize; i++)
+		for (int i = _size; i < newSize; i++)
 		{
 			temp[i] = v[j];
 			j++;
 		}
 		
-		delete[] vec;
-		vec = temp;
-		capacity = newCapacity;
+		delete[] _vec;
+		_vec = temp;
+		_capacity = newCapacity;
 	}
-	size = newSize;
+	_size = newSize;
 }
 
 void Vector::operator+=(int num)
 {
-	for (int i = 0; i < size; i++)
+	for (int i = 0; i < _size; i++)
 	{
-		vec[i] += num;
+		_vec[i] += num;
 	}
 }
 
 void Vector::operator-=(int num)
 {
-	for (int i = 0; i < size; i++)
+	for (int i = 0; i < _size; i++)
 	{
-		vec[i] -= num;
+		_vec[i] -= num;
 	}
 }
 
 void Vector::operator*=(int num)
 {
-	for (int i = 0; i < size; i++)
+	for (int i = 0; i < _size; i++)
 	{
-		vec[i] *= num;
+		_vec[i] *= num;
 	}
 }
 
 void Vector::operator/=(int num)
 {
-	for (int i = 0; i < size; i++)
+	for (int i = 0; i < _size; i++)
 	{
-		vec[i] /= num;
+		_vec[i] /= num;
 	}
 }
 
 void Vector::insert(int index, int val)
 {
-	if (index == size)
+	if (index == _size)
 	{
 		push_back(val);
 	}
 	else
 	{
-		if (index < size)
+		if (index < _size)
 		{
-			if (size < capacity) // insert to vec
+			if (_size < _capacity) // insert to vec
 			{
-				int prev = vec[index];
-				vec[index] = val;
-				size += 1;
+				int prev = _vec[index];
+				_vec[index] = val;
+				_size += 1;
 				int i = index + 1;
-				for (i; i < size; i++)
+				for (i; i < _size; i++)
 				{
-					int t = vec[i];
-					vec[i] = prev;
+					int t = _vec[i];
+					_vec[i] = prev;
 					prev = t;
 				}
 			}
 
 			else // size == capacity
 			{
-				capacity = insertCapacity(capacity, capacity + 1);
-				int* temp = new int[capacity];
+				_capacity = insertCapacity(_capacity, _capacity + 1);
+				int* temp = new int[_capacity];
 				temp = copy(temp);
 				int prev = temp[index];
 				temp[index] = val;
-				size += 1;
+				_size += 1;
 				int i = index + 1;
-				for (i; i < size; i++)
+				for (i; i < _size; i++)
 				{
-					int t = vec[i];
-					vec[i] = prev;
+					int t = _vec[i];
+					_vec[i] = prev;
 					prev = t;
 				}
-				delete[] vec;
-				vec = temp;
+				delete[] _vec;
+				_vec = temp;
 			}
 		}
 	}
@@ -373,16 +397,16 @@ void Vector::insert(int index, int val)
 
 void Vector::erase(int index)
 {
-	if (index < size)
+	if (index < _size)
 	{
-		int next = vec[size - 1];
-		for (int i = size - 2; i >= index; i--)
+		int next = _vec[_size - 1];
+		for (int i = _size - 2; i >= index; i--)
 		{
-			int temp = vec[i];
-			vec[i] = next;
+			int temp = _vec[i];
+			_vec[i] = next;
 			next = temp;
 		}
-		size -= 1;
+		_size -= 1;
 	}
 }
 
