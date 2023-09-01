@@ -1,8 +1,8 @@
 #include "Stack.h"
 
-Stack::Stack(int _size, int val)
+Stack::Stack(int size, int val)
 {
-	v = new Vector(_size, val);
+	v = new Vector(size, val);
 }
 
 Stack::Stack(const Stack& s)
