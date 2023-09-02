@@ -9,7 +9,7 @@ class Stack
 
 public:
 	//defult ctor
-	Stack(int size = 0, int val = 0);
+	Stack(int _size = 0, int val = 0);
 	//copy ctor
 	Stack(const Stack& s);
 
